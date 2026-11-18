@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate JSON config templates
+        run: |
+          for f in configs/*.json; do
+            node -e "JSON.parse(require('fs').readFileSync('$f', 'utf8'))"
+            echo "OK: $f"
+          done
+      - name: Check Node.js verifier syntax
+        run: node --check scripts/verify-claude-code.mjs
+      - name: Check shell script syntax
+        run: bash -n scripts/export-env.sh
